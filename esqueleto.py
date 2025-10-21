@@ -41,8 +41,8 @@ def main():
     ])
 
     translation = np.array([
-        [1.0, 0.0, 0.0, 0.0],  # Era 3.0, mude para 0.0
-        [0.0, 1.0, 0.0, 0.0],  # Era 2.0, mude para 0.0
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0], 
         [0.0, 0.0, 1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
     ])
@@ -92,7 +92,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT)
 
         # Definicao da matriz de projeção
-        transf_matrix = translation @ rotation @ scale
+        #transf_matrix = translation @ rotation @ scale
         
 
         # Matriz de transformação
