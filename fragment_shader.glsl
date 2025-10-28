@@ -8,9 +8,14 @@ in vec2 UV;
 out vec4 FragColor;
 
 uniform sampler2D frameColor;
+uniform int controller;
 
 // Processamento
 void main()
 {
-    FragColor = texture2D(frameColor, UV.xy);
+    if (controller == 1) {
+        FragColor = texture2D(frameColor, UV.xy);
+    } else {
+        FragColor = vec4(vColor, 1);
+    }
 }

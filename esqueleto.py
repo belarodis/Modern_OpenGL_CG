@@ -49,10 +49,10 @@ def main():
     ])
     # Triângulo (posição + cor)
     triangle_vertices = np.array([
-        # Posição # Textura Coords (U, V)
-         0.5,  0.5, 0.0,      1.0, 1.0, # Canto superior direito
-         0.5, -0.5, 0.0,      1.0, 0.0, # Canto inferior direito
-        -0.5, -0.5, 0.0,      0.0, 0.0, # Canto inferior esquerdo
+        # Posição # Textura Coords (U, V) # Cor
+         0.5,  0.5, 0.0,      1.0, 1.0,        1.0, 0.0, 0.0, # Canto superior direito
+         0.5, -0.5, 0.0,      1.0, 0.0,        0.0, 1.0, 0.0, # Canto inferior direito
+        -0.5, -0.5, 0.0,      0.0, 0.0,        0.0, 0.0, 1.0 # Canto inferior esquerdo
     ], dtype=np.float32)
 
     """ triangle_vertices = np.array([
@@ -94,7 +94,7 @@ def main():
 
 
     # 3.1 VAO/VBO
-    VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 2]) #x, y, z = 3 e U, V = 2
+    VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 2, 3]) #x, y, z = 3 e U, V = 2 e RGB = 3
     #VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
     VAO_sqr, VBO_sqr = setup_geometry(square_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
     # 3.2 Shaders
@@ -120,6 +120,9 @@ def main():
     glUseProgram(program)
     texture_loc = glGetUniformLocation(program, "frameColor")
     glUniform1i(texture_loc, 0) # Texture unit 0
+
+    controller_loc = glGetUniformLocation(program, "controller")
+    glUniform1i(controller_loc, 1) # Controller, se 0 -> cor, se 1 -> textura
 
     # 4. Loop de Renderização Principal
     while not glfw.window_should_close(window):
