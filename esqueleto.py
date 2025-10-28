@@ -1,6 +1,7 @@
 import glfw, math, ctypes
 from OpenGL.GL import *
 import numpy as np
+import cv2
 
 
 def main():
@@ -48,10 +49,17 @@ def main():
     ])
     # Triângulo (posição + cor)
     triangle_vertices = np.array([
+        # Posição # Textura Coords (U, V)
+         0.5,  0.5, 0.0,      1.0, 1.0, # Canto superior direito
+         0.5, -0.5, 0.0,      1.0, 0.0, # Canto inferior direito
+        -0.5, -0.5, 0.0,      0.0, 0.0, # Canto inferior esquerdo
+    ], dtype=np.float32)
+
+    """ triangle_vertices = np.array([
         -0.7, -0.5, 0.0, 1.0, 0.0, 0.0, # V1
          0.0, -0.5, 0.0, 0.0, 1.0, 0.0, # V2
         -0.35, 0.5, 0.0, 0.0, 0.0, 1.0 # V3
-    ], dtype=np.float32)
+    ], dtype=np.float32) """
 
     # Linha (posição + cor)
     square_vertices = np.array([
@@ -63,10 +71,32 @@ def main():
         0.2,  0.5, 0.0, 1.0, 0.5, 0.2 # T2 V3
     ], dtype=np.float32)
 
-    VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
-    VAO_sqr, VBO_sqr = setup_geometry(square_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
+    image = cv2.imread("./coast_sand_rocks_02_diff_4k.jpg")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.flip(image, 0)
+    height, width, channels = image.shape
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(
+        GL_TEXTURE_2D, # target
+        0, # level
+        GL_RGB, # internal format (como a GPU armazena)
+        width, height, # dimensões
+        0, # border (sempre 0)
+        GL_RGB, # formato dos dados que você enviou
+        GL_UNSIGNED_BYTE, # tipo de cada componente
+        image # ponteiro (array numpy)
+    )
+
 
     # 3.1 VAO/VBO
+    VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 2]) #x, y, z = 3 e U, V = 2
+    #VAO_tri, VBO_tri = setup_geometry(triangle_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
+    VAO_sqr, VBO_sqr = setup_geometry(square_vertices, [3, 3]) #x, y, z = 3 e R, G, B = 3
     # 3.2 Shaders
     # 3.3 Programa (shaders)
 
@@ -87,6 +117,10 @@ def main():
     glAttachShader(program, fshader) #vincula o shader ao programa (1 por 1)
     glLinkProgram(program) #linka todos os shaders para poderem conversar entre si dentro do programa
 
+    glUseProgram(program)
+    texture_loc = glGetUniformLocation(program, "frameColor")
+    glUniform1i(texture_loc, 0) # Texture unit 0
+
     # 4. Loop de Renderização Principal
     while not glfw.window_should_close(window):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -103,6 +137,9 @@ def main():
             # Vincular VAOs/VBOs dos seus desenhos
         # Desenha triângulo
         glUseProgram(program)
+        glActiveTexture(GL_TEXTURE0) # Ativa a unidade de textura 0
+        glBindTexture(GL_TEXTURE_2D, texture_id) # lá do começo com glGenTextures
+        glUniform1i(texture_loc, 0) #obtida anteriormente
         glBindVertexArray(VAO_tri)
         glDrawArrays(GL_TRIANGLES, 0, 3)
         glBindVertexArray(0)
@@ -133,6 +170,18 @@ def main():
 
     # 5. Finalização
     glfw.terminate()
+
+
+
+
+
+
+
+
+
+
+
+
 
 def setup_geometry(vertices, attributes):
     #VBO
