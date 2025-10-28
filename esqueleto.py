@@ -139,9 +139,12 @@ def main():
         glUseProgram(program)
         glActiveTexture(GL_TEXTURE0) # Ativa a unidade de textura 0
         glBindTexture(GL_TEXTURE_2D, texture_id) # lá do começo com glGenTextures
-        glUniform1i(texture_loc, 0) #obtida anteriormente
         glBindVertexArray(VAO_tri)
         glDrawArrays(GL_TRIANGLES, 0, 3)
+        glBindVertexArray(0)
+
+        # Unbind da texture pq só uso no triângulo
+        glBindTexture(GL_TEXTURE_2D, 0)
         glBindVertexArray(0)
 
         # Desenha quadrado
